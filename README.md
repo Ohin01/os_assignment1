@@ -71,33 +71,39 @@ The automated test script (`build_and_test.sh`) compiles the shell with `gcc -Wa
 | # | Test Command | Feature / Category | Expected Outcome | Actual Result |
 |---|---|---|---|---|
 | 1 | `help` | Help menu | Prints list of supported commands and syntax | PASS: Displayed command guide |
-| 2 | `pwd` | Working directory | Prints absolute path of current folder | PASS: Displayed `/home/ohin/Documents/OS` |
+| 2 | `pwd` | Working directory | Prints absolute path of current folder | PASS: Displayed current directory path |
 | 3 | `whoami` | User identification | Prints current logged-in username | PASS: Displayed `ohin` |
 | 4 | `uname` | Kernel / OS info | Displays OS name, kernel version, machine architecture | PASS: Displayed `Linux ... x86_64` |
 | 5 | `ls` | Directory listing | Lists non-hidden files in current directory | PASS: Entries listed in short format |
 | 6 | `ls -a` | Hidden files | Lists all entries including `.` and `..` | PASS: Hidden entries listed |
 | 7 | `ls -l` | Long format listing | Displays permissions (`drwxr-xr-x`), sizes, dates, names | PASS: Formatted file list displayed |
 | 8 | `mkdir test_dir` | Directory creation | Creates new directory `test_dir` with permissions `0755` | PASS: `test_dir` created |
-| 9 | `touch test_dir/hello.txt` | File creation | Creates empty file inside subdirectory | PASS: `hello.txt` created |
-| 10 | `ls test_dir` | Targeted listing | Lists entries inside `test_dir` | PASS: Lists `hello.txt` |
-| 11 | `ls -l test_dir` | Targeted long listing | Long format metadata for entries inside `test_dir` | PASS: Formatted metadata displayed |
-| 12 | `echo Hello World` | Text output | Prints string arguments to standard output | PASS: Output `Hello World` |
-| 13 | `echo $HOME` | Variable expansion | Expands environment variable `$HOME` | PASS: Output `/home/ohin` |
-| 14 | `cp test_dir/hello.txt test_dir/hello_copy.txt` | File copy | Copies file byte-by-byte | PASS: `hello_copy.txt` created |
-| 15 | `cp test_dir/hello.txt test_dir/hello.txt` | Same-file protection | Detects matching inode/device; halts without truncating | PASS: "are the same file" error printed |
-| 16 | `mv test_dir/hello_copy.txt test_dir/hello_moved.txt` | Move / rename | Renames file atomically | PASS: `hello_moved.txt` created |
-| 17 | `cat test_msg.txt` | File reading | Streams file contents to stdout | PASS: Output `Hello, custom shell file test!` |
-| 18 | `cat test_dir/hello.txt` | Empty file reading | Reads empty (0-byte) file | PASS: Empty output without error |
-| 19 | `cat /etc/passwd` | Root boundary (read) | Rejects reading files outside shell root | PASS: "access denied, outside shell root" |
-| 20 | `mkdir ../outside_test` | Root boundary (write) | Rejects creating directories outside shell root | PASS: "access denied, outside shell root" |
-| 21 | `uptime` | System uptime | Reads `/proc/uptime` and `/proc/loadavg` | PASS: Formatted uptime & load printed |
-| 22 | `meminfo` | Memory statistics | Reads `/proc/meminfo` | PASS: MemTotal, MemFree, etc. printed |
-| 23 | `echo pipeline_test \| cat` | Piping (built-in) | Streams stdout of `echo` to stdin of `cat` | PASS: Output `pipeline_test` |
-| 24 | `ls \| grep main` | Piping (external) | Filters output of `ls` through `grep` | PASS: Output `main.c` |
-| 25 | `history` | Command history | Displays numbered history list from circular buffer | PASS: All 28 executed commands printed |
-| 26 | `rm test_msg.txt` | File deletion | Deletes test sample file via `unlink()` | PASS: File deleted |
-| 27 | `rm test_dir/hello.txt` | File deletion | Deletes regular file via `unlink()` | PASS: File deleted |
-| 28 | `rm test_dir/hello_moved.txt` | File deletion | Deletes second regular file via `unlink()` | PASS: File deleted |
-| 29 | `rm test_dir` | Directory deletion | Removes empty directory via `rmdir()` | PASS: Directory deleted |
-| 30 | `cd ..` | Root boundary (`cd`) | Blocks navigating above root directory | PASS: "cannot go above the shell root directory" |
-| 31 | `exit 0` | Shell termination | Exits shell process with exit status 0 | PASS: Shell exits cleanly with code 0 |
+| 9 | `ls` | Directory verification | Verifies `test_dir` appears in directory listing | PASS: `test_dir` listed |
+| 10 | `touch test_dir/hello.txt` | File creation | Creates empty file inside subdirectory | PASS: `hello.txt` created |
+| 11 | `ls test_dir` | Targeted listing | Lists entries inside `test_dir` | PASS: Lists `hello.txt` |
+| 12 | `ls -l test_dir` | Targeted long listing | Long format metadata for entries inside `test_dir` | PASS: Formatted metadata displayed |
+| 13 | `echo Hello World` | Text output | Prints string arguments to standard output | PASS: Output `Hello World` |
+| 14 | `echo $HOME` | Variable expansion | Expands environment variable `$HOME` | PASS: Output `/home/ohin` |
+| 15 | `cp test_dir/hello.txt test_dir/hello_copy.txt` | File copy | Copies file byte-by-byte | PASS: `hello_copy.txt` created |
+| 16 | `ls test_dir` | Copy verification | Confirms both `hello.txt` and `hello_copy.txt` exist | PASS: Both files listed |
+| 17 | `cp test_dir/hello.txt test_dir/hello.txt` | Same-file protection | Detects matching inode/device; halts without truncating | PASS: "are the same file" error printed |
+| 18 | `mv test_dir/hello_copy.txt test_dir/hello_moved.txt` | Move / rename | Renames file atomically | PASS: `hello_moved.txt` created |
+| 19 | `ls test_dir` | Rename verification | Confirms `hello_copy.txt` was renamed to `hello_moved.txt` | PASS: `hello_moved.txt` listed |
+| 20 | `cat test_msg.txt` | File reading | Streams file contents to stdout | PASS: Output `Hello, custom shell file test!` |
+| 21 | `cat test_dir/hello.txt` | Empty file reading | Reads empty (0-byte) file | PASS: Empty output without error |
+| 22 | `cat /etc/passwd` | Root boundary (read) | Rejects reading files outside shell root | PASS: "access denied, outside shell root" |
+| 23 | `mkdir ../outside_test` | Root boundary (write) | Rejects creating directories outside shell root | PASS: "access denied, outside shell root" |
+| 24 | `uptime` | System uptime | Reads `/proc/uptime` and `/proc/loadavg` | PASS: Formatted uptime & load printed |
+| 25 | `meminfo` | Memory statistics | Reads `/proc/meminfo` | PASS: MemTotal, MemFree, etc. printed |
+| 26 | `echo pipeline_test \| cat` | Piping (built-in) | Streams stdout of `echo` to stdin of `cat` | PASS: Output `pipeline_test` |
+| 27 | `ls \| grep main` | Piping (external) | Filters output of `ls` through `grep` | PASS: Output `main.c` |
+| 28 | `history` | Command history | Displays numbered history list from circular buffer | PASS: All 28 executed commands printed |
+| 29 | `rm test_msg.txt` | File deletion | Deletes test sample file via `unlink()` | PASS: File deleted |
+| 30 | `rm test_dir/hello.txt` | File deletion | Deletes regular file via `unlink()` | PASS: File deleted |
+| 31 | `rm test_dir/hello_moved.txt` | File deletion | Deletes second regular file via `unlink()` | PASS: File deleted |
+| 32 | `ls test_dir` | Directory empty verification | Verifies `test_dir` is now empty | PASS: No files listed |
+| 33 | `rm test_dir` | Directory deletion | Removes empty directory via `rmdir()` | PASS: Directory deleted |
+| 34 | `ls` | Removal verification | Verifies `test_dir` was removed | PASS: `test_dir` no longer listed |
+| 35 | `cd ..` | Root boundary (`cd`) | Blocks navigating above root directory | PASS: "cannot go above the shell root directory" |
+| 36 | `pwd` | Root boundary verification | Verifies directory stayed at root | PASS: Remains in shell root directory |
+| 37 | `exit 0` | Shell termination | Exits shell process with exit status 0 | PASS: Shell exits cleanly with code 0 |
