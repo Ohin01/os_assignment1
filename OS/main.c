@@ -21,14 +21,14 @@
 #define HISTORY_MAX  50   
 
 char *argv[MAX_ARG];      
-int   argc = 0;           
-char  command[MAX_SIZE];   
+int argc = 0;           
+char command[MAX_SIZE];   
 
 char rootDir[PATH_MAX];   
 char cwd[PATH_MAX];       
 
 char history[HISTORY_MAX][MAX_SIZE]; 
-int  history_count = 0;            
+int history_count = 0;            
 
 void printDir(void)
 {
@@ -45,21 +45,21 @@ void addHistory(const char *cmd)
 {
     if (cmd[0] == '\0') return;          
 
-    int slot = history_count % HISTORY_MAX; //wraps
+    int slot = history_count % HISTORY_MAX; // wraps
     strncpy(history[slot], cmd, MAX_SIZE - 1);
-    history[slot][MAX_SIZE - 1] = '\0'; //null at the end
+    history[slot][MAX_SIZE - 1] = '\0'; // null at the end
 
     history_count++;                          
 }
 
 void takeCommand(void)
 {
-    if (fgets(command, sizeof(command), stdin) == NULL) //read line from stdin
+    if (fgets(command, sizeof(command), stdin) == NULL) // read line from stdin
     {
         printf("\nExiting shell.\n");
         exit(0);
     }
-    command[strcspn(command, "\n")] = '\0'; //replace trailing '\n' with '\0'
+    command[strcspn(command, "\n")] = '\0'; // replace trailing '\n' with '\0'
     if (!isatty(STDIN_FILENO)) printf("%s\n", command); // echo input piped mode
 }
 
@@ -378,7 +378,7 @@ void cmd_touch(void)
     if (!insideRoot(argv[1])) {fprintf(stderr, "touch: access denied, outside shell root\n"); return;}
 
     int fd = open(argv[1], O_CREAT | O_WRONLY, 0644); // create if not exists
-    if (fd < 0) { perror("touch: open"); return; }
+    if (fd < 0) {perror("touch: open"); return;}
 
     close(fd); // close immediately
 
@@ -574,8 +574,7 @@ void runSingleCommand(char **av, int ac)
     {
         int status; 
         pid_t wpid;
-        do
-        {
+        do {
             wpid = waitpid(pid, &status, 0); // wait for child process to finish
         } while (wpid == -1 && errno == EINTR); // retry if interrupted by signal
     }
