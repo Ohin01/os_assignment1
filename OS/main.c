@@ -88,15 +88,15 @@ int insideRoot(const char *path)
         return (actual[len] == '\0' || actual[len] == '/'); // exact or subdirectory match
     }
 
-    // if path does not exist yet, check its parent directory
+    // if path does not exist yet
     char parent[PATH_MAX];
-    const char *slash = strrchr(path, '/'); // locate last slash
+    const char *slash = strrchr(path, '/');
 
-    if (slash == NULL) // no slash in path, parent is current directory
+    if (slash == NULL) // if no slash in path, parent is current directory
     {
         strcpy(parent, ".");
     }
-    else if (slash == path) // leading slash, parent is root
+    else if (slash == path) // if leading slash, parent is root
     {
         strcpy(parent, "/"); 
     }
@@ -350,7 +350,6 @@ void cmd_ls(void)
     closedir(dp); 
 }
 
-//prints the current user's login name
 void cmd_whoami(void)
 {
     uid_t uid = getuid(); // get real user ID of process
@@ -359,7 +358,6 @@ void cmd_whoami(void)
     printf("%s\n", pw->pw_name);  
 }
 
-// prints OS name, hostname, kernel release, architecture
 void cmd_uname(void)
 {
     struct utsname uts;
@@ -655,17 +653,17 @@ void dispatchCommand(void)
     char *left_raw  = NULL;
     char *right_raw = NULL;
 
-    char cmd_copy[MAX_SIZE]; // copy cmd
+    char cmd_copy[MAX_SIZE];
     strcpy(cmd_copy, command); 
 
     if (parsePipe(cmd_copy, &left_raw, &right_raw))
     {
         // pipe path
         char *left_av[MAX_ARG];
-        int   left_ac  = tokenize(left_raw,  left_av);  // tokenize left side
+        int left_ac  = tokenize(left_raw,  left_av);  // tokenize left side
 
         char *right_av[MAX_ARG];
-        int   right_ac = tokenize(right_raw, right_av); // tokenize right side
+        int right_ac = tokenize(right_raw, right_av); // tokenize right side
 
         if (left_ac == 0 || right_ac == 0)
         {
