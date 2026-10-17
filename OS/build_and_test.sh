@@ -9,7 +9,6 @@ echo "Compilation successful."
 echo ""
 
 #Run automated tests
-# create sample file to test non-empty cat reading
 echo "Hello, custom shell file test!" > test_msg.txt
 
 ./myshell <<'EOF'
