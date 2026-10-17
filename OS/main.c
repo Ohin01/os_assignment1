@@ -92,11 +92,11 @@ int insideRoot(const char *path)
     char parent[PATH_MAX];
     const char *slash = strrchr(path, '/');
 
-    if (slash == NULL) // if no slash in path, parent is current directory
+    if (slash == NULL) 
     {
         strcpy(parent, ".");
     }
-    else if (slash == path) // if leading slash, parent is root
+    else if (slash == path)
     {
         strcpy(parent, "/"); 
     }
@@ -129,7 +129,6 @@ void cmd_pwd(void)
     printf("%s\n", buf);                     
 }
 
-// chdir() interprets "/.." as parent directory
 void cmd_cd(void)
 {
     char target[PATH_MAX * 2]; // holds where to change
