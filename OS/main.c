@@ -60,7 +60,7 @@ void takeCommand(void)
         exit(0);
     }
     command[strcspn(command, "\n")] = '\0'; //replace trailing '\n' with '\0'
-    if (!isatty(STDIN_FILENO)) printf("%s\n", command); // echo input in non-interactive / piped mode
+    if (!isatty(STDIN_FILENO)) printf("%s\n", command); // echo input piped mode
 }
 
 void parseCommand(void)
@@ -88,34 +88,34 @@ int insideRoot(const char *path)
         return (actual[len] == '\0' || actual[len] == '/'); // exact or subdirectory match
     }
 
-    // if path does not exist yet (e.g. creating a new file/dir), check its parent directory
-    char parent[PATH_MAX]; // buffer for parent path
+    // if path does not exist yet, check its parent directory
+    char parent[PATH_MAX];
     const char *slash = strrchr(path, '/'); // locate last slash
 
     if (slash == NULL) // no slash in path, parent is current directory
     {
-        strcpy(parent, "."); // parent is "."
+        strcpy(parent, ".");
     }
-    else if (slash == path) // leading slash e.g. "/foo"
+    else if (slash == path) // leading slash, parent is root
     {
-        strcpy(parent, "/"); // parent is root
+        strcpy(parent, "/"); 
     }
     else // extract path before last slash
     {
-        size_t len = (size_t)(slash - path); // parent string length
-        if (len >= sizeof(parent)) return 0; // overflow safety
-        memcpy(parent, path, len); // copy parent slice
-        parent[len] = '\0'; // null-terminate
+        size_t len = (size_t)(slash - path);
+        if (len >= sizeof(parent)) return 0;
+        memcpy(parent, path, len);
+        parent[len] = '\0'; 
     }
 
     if (realpath(parent, actual) != NULL) // resolve parent directory
     {
-        size_t len = strlen(rootDir); // length of root directory string
-        if (strncmp(actual, rootDir, len) != 0) return 0; // check parent is within root
-        return (actual[len] == '\0' || actual[len] == '/'); // exact or subdirectory match
+        size_t len = strlen(rootDir); 
+        if (strncmp(actual, rootDir, len) != 0) return 0; 
+        return (actual[len] == '\0' || actual[len] == '/'); 
     }
 
-    return 0; // reject if parent cannot be verified
+    return 0;
 }
 
 void cmd_pwd(void)
@@ -140,36 +140,36 @@ void cmd_cd(void)
     }
     else
     {
-        if (argv[1][0] == '/') //absolute path relative to shell root
+        if (argv[1][0] == '/') //absolute path
         {
             snprintf(target, sizeof(target), "%s%s", rootDir, argv[1]); //prepend rootDir
         }
         else  //relative path argument
         {
-            getcwd(target, sizeof(target)); //get current working directory
-            strcat(target, "/"); //append separator
-            strcat(target, argv[1]);  //append the relative part
+            getcwd(target, sizeof(target)); 
+            strcat(target, "/");
+            strcat(target, argv[1]); 
         }
     }
 
-    char resolved[PATH_MAX]; //buffer for canonical path
+    char resolved[PATH_MAX]; 
     if (realpath(target, resolved) == NULL) //resolve target path
     {
-        perror("cd"); //report error if path does not exist
-        return; //abort
+        perror("cd");
+        return;
     }
 
     if (!insideRoot(resolved)) //if outside root
     {
-        chdir(rootDir); //stay at root directory
-        printf("cd: cannot go above the shell root directory\n"); //print warning
-        return; //abort
+        chdir(rootDir);
+        printf("cd: cannot go above the shell root directory\n");
+        return;
     }
 
-    if (chdir(resolved) != 0) //perform directory change
+    if (chdir(resolved) != 0) 
     {
-        perror("cd"); //report error if chdir fails
-        return; //abort
+        perror("cd"); 
+        return;
     }
 }
 
@@ -259,18 +259,18 @@ void cmd_ls(void)
             // reject multiple directory arguments
             if (dir_found)
             {
-                fprintf(stderr, "ls: too many directory arguments\n"); // report excess arguments
-                return; // abort
+                fprintf(stderr, "ls: too many directory arguments\n");
+                return;
             }
-            dir = argv[i]; // set target directory
-            dir_found = 1; // mark directory found
+            dir = argv[i];
+            dir_found = 1; 
         }
     }
 
-    if (!insideRoot(dir)) // check if directory is inside root
+    if (!insideRoot(dir))
     {
-        fprintf(stderr, "ls: cannot access '%s': outside shell root\n", dir); // report violation
-        return; // abort
+        fprintf(stderr, "ls: cannot access '%s': outside shell root\n", dir);
+        return;
     }
 
     DIR *dp = opendir(dir); // open the directory stream
@@ -299,7 +299,6 @@ void cmd_ls(void)
                                 dir[strlen(dir) - 1] == '/') ? "" : "/",
                                entry->d_name);
 
-            // snprintf returns the required length
             if (len < 0 || (size_t)len >= sizeof(fullpath))
             {
                 fprintf(stderr, "ls: path too long: '%s'\n", entry->d_name);
@@ -308,14 +307,14 @@ void cmd_ls(void)
 
             struct stat st;
 
-            //lstat gets metadata about the link itself, rather than its target
+            //lstat gets metadata about the link itself
             if (lstat(fullpath, &st) != 0)
             {
                 fprintf(stderr, "ls: cannot access '%s': %s\n", fullpath, strerror(errno));
                 continue;
             }
 
-            char perms[11]; // 10 permission characters plus '\0'
+            char perms[11];
             perms[0]  = S_ISDIR(st.st_mode) ? 'd' : S_ISLNK(st.st_mode) ? 'l' : '-';
             perms[1]  = (st.st_mode & S_IRUSR) ? 'r' : '-';
             perms[2]  = (st.st_mode & S_IWUSR) ? 'w' : '-';
@@ -504,6 +503,7 @@ void cmd_uptime(void)
 
 void cmd_meminfo(void)
 {
+    // open /proc/meminfo
     int fd = open("/proc/meminfo", O_RDONLY);
     if (fd < 0) {perror("meminfo: open"); return;}
 
@@ -520,7 +520,7 @@ void cmd_meminfo(void)
         char *pos = strstr(buf, fields[i]); //find the field label in the buffer
         if (!pos) continue;
         char *end = strchr(pos, '\n');
-        if (end) *end = '\0'; //temporarily terminate the line
+        if (end) *end = '\0';
         printf("%s\n", pos);
         if (end) *end = '\n'; //restore the newline
     }
@@ -533,19 +533,19 @@ void runSingleCommand(char **av, int ac)
     if (strcmp(av[0], "exit") == 0)
     {
         int status = 0; 
-        if (ac > 1) // status argument provided
+        if (ac > 1) 
         {
             char *endptr; // pointer for invalid trailing characters
             errno = 0; // reset errno
-            long val = strtol(av[1], &endptr, 10); // convert string to long
+            long val = strtol(av[1], &endptr, 10);
             if (errno != 0 || *endptr != '\0') // check if conversion was valid
             {
-                fprintf(stderr, "exit: numeric argument required\n"); // report syntax error
-                return; // do not exit on invalid status
+                fprintf(stderr, "exit: numeric argument required\n"); 
+                return; 
             }
-            status = (int)val; // assign status code
+            status = (int)val;
         }
-        exit(status); // terminate shell process with exit status
+        exit(status);
     }
     else if (strcmp(av[0], "pwd") == 0) {cmd_pwd(); return;}
     else if (strcmp(av[0], "cd") == 0) {cmd_cd(); return;}
@@ -574,8 +574,8 @@ void runSingleCommand(char **av, int ac)
     }
     else if (pid > 0)
     {
-        int status; // holds child termination status
-        pid_t wpid; // holds waitpid return value
+        int status; 
+        pid_t wpid;
         do
         {
             wpid = waitpid(pid, &status, 0); // wait for child process to finish
@@ -620,9 +620,9 @@ void executePiped(char **args1, char **args2)
 
     if (p1 == 0)                              
     {
-        dup2(pipefd[1], STDOUT_FILENO); // redirect stdout → pipe write end
+        dup2(pipefd[1], STDOUT_FILENO); // redirect stdout to pipe write end
         close(pipefd[0]); // close unused read end
-        close(pipefd[1]); // close original write fd (dup2 copied it)
+        close(pipefd[1]); // close original write fd
 
         execvp(args1[0], args1);              
         perror("Pipe cmd1 failed");
@@ -633,21 +633,21 @@ void executePiped(char **args1, char **args2)
 
     if (p2 == 0)
     {
-        dup2(pipefd[0], STDIN_FILENO); // redirect stdin ← pipe read end
+        dup2(pipefd[0], STDIN_FILENO); // redirect stdin to pipe read end
         close(pipefd[1]); // close unused write end
-        close(pipefd[0]); // close original read fd (dup2 copied it)
+        close(pipefd[0]); // close original read fd
 
         execvp(args2[0], args2);              
         perror("Pipe cmd2 failed");
         exit(1);
     }
 
-    close(pipefd[0]); // parent doesn't use the pipe
-    close(pipefd[1]); // closing write end here sends EOF to right child
+    close(pipefd[0]); 
+    close(pipefd[1]); 
 
-    int s1, s2; // status variables for child processes
-    while (waitpid(p1, &s1, 0) == -1 && errno == EINTR); // wait for first child process
-    while (waitpid(p2, &s2, 0) == -1 && errno == EINTR); // wait for second child process
+    int s1, s2;
+    while (waitpid(p1, &s1, 0) == -1 && errno == EINTR); 
+    while (waitpid(p2, &s2, 0) == -1 && errno == EINTR);
 }
 
 void dispatchCommand(void)
@@ -678,7 +678,7 @@ void dispatchCommand(void)
     else
     {
         // single-command
-        parseCommand(); //parse
+        parseCommand();
         runSingleCommand(argv, argc);
     }
 }
